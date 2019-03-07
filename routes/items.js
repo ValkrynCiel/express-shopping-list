@@ -26,35 +26,57 @@ router.post("", function(req, res, next){
 })
 
 router.get("/:name", function(req, res, next){
-
-    let foundItem = items.find(item => item.item === req.params.name);
-
-    return res.json({foundItem})
+    try {
+        let foundItem = items.find(item => item.item === req.params.name);
+        if (!foundItem){
+            throw new ExpressError("item not found", 400)
+        }
+        return res.json({foundItem})
+    } catch(err) {
+        return next(err);
+    }
 })
 
 router.patch("/:name", function(req, res, next){
 
-    let itemIdx = items.findIndex(item => item.item === req.params.name);
-    let newName = req.body.item || items[itemIdx].item;
-    let newPrice = req.body.price || items[itemIdx].price;
-    
-    items[itemIdx] = {newName, newPrice};
-    let updatedItem = items[itemIdx]
-    
-    return res.json({updatedItem})
+    try {
+        let itemIdx = items.findIndex(item => item.item === req.params.name);
+
+        if (itemIdx === -1){
+            throw new ExpressError("item not found", 400)
+        }
+
+        let newName = req.body.item || items[itemIdx].item;
+        let newPrice = req.body.price || items[itemIdx].price;
+
+        if (!req.body.item && !req.body.price){
+            throw new ExpressError("please send JSON to update an item", 400)
+        }
+        
+        items[itemIdx] = {newName, newPrice};
+        let updatedItem = items[itemIdx]
+        
+        return res.json({updatedItem})
+    } catch(err){
+        return next(err);
+    }
 })
 
 router.delete("/:name", function(req, res, next){
 
-    let itemIdx = items.findIndex(item => item.item === req.params.name);
-    items.splice(itemIdx, 1);
+    try {
+        let itemIdx = items.findIndex(item => item.item === req.params.name);
 
-    return res.json({items})
+        if (itemIdx === -1){
+            throw new ExpressError("item not found", 400)
+        }
+        items.splice(itemIdx, 1);
+
+        return res.json({items})
+    } catch(err) {
+        return next(err);
+    }
 })
-
-
-
-
 
 
 module.exports = router;
