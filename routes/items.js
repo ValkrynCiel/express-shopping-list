@@ -1,17 +1,28 @@
 const express = require("express");
 const router = new express.Router();
-const ExpressError = ("../expressError");
+const ExpressError = require("../expressError");
 const items = require("../fakeDb")
 
 router.get("", function(req, res, next){
-    return res.json({items})
+    try {
+        return res.json({items});
+    } catch(err) {
+        return next(err);
+    }
 })
 
 router.post("", function(req, res, next){
-    let {item, price} = req.body;
-
-    items.push({item, price});
-    return res.json({item, price})
+    try {
+        let {item, price} = req.body;
+        if (typeof item !== "string" || !Number.isFinite(price) || item.length === 0){
+            throw new ExpressError("must provide valid item name AND price!", 400)
+        }
+        items.push({item, price});
+        return res.json({item, price});
+    } catch(err) {
+        return next(err);
+    }
+    
 })
 
 router.get("/:name", function(req, res, next){
@@ -32,6 +43,15 @@ router.patch("/:name", function(req, res, next){
     
     return res.json({updatedItem})
 })
+
+router.delete("/:name", function(req, res, next){
+
+    let itemIdx = items.findIndex(item => item.item === req.params.name);
+    items.splice(itemIdx, 1);
+
+    return res.json({items})
+})
+
 
 
 
