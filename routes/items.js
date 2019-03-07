@@ -16,9 +16,21 @@ router.post("", function(req, res, next){
 
 router.get("/:name", function(req, res, next){
 
-    let found_item = items.find(item => item.item === req.params.name);
-    debugger;
-    return res.json({found_item})
+    let foundItem = items.find(item => item.item === req.params.name);
+
+    return res.json({foundItem})
+})
+
+router.patch("/:name", function(req, res, next){
+
+    let itemIdx = items.findIndex(item => item.item === req.params.name);
+    let newName = req.body.item || items[itemIdx].item;
+    let newPrice = req.body.price || items[itemIdx].price;
+    
+    items[itemIdx] = {newName, newPrice};
+    let updatedItem = items[itemIdx]
+    
+    return res.json({updatedItem})
 })
 
 
